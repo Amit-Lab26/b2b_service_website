@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Browse Services · B2B Service Marketplace{% endblock %}
+
+{% block content %}
+<h1 class="hero-title" style="font-size: 1.4rem; margin-bottom: 0.5rem;">
+  Browse services
+</h1>
+<p class="hero-subtitle" style="margin-bottom: 1rem;">
+  Explore services offered by other businesses. Filter by keywords or category.
+</p>
+
+<form method="get" style="margin-bottom: 1rem;">
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+    <div style="flex: 1 1 200px;">
+      <label for="q">Search</label>
+      <input type="text" id="q" name="q" value="{{ q }}">
+    </div>
+    <div style="flex: 1 1 200px;">
+      <label for="category">Category</label>
+      <input type="text" id="category" name="category" value="{{ category }}">
+    </div>
+    <div style="align-self: flex-end;">
+      <button type="submit" class="btn btn-outline">Filter</button>
+    </div>
+  </div>
+</form>
+
+{% if services %}
+<div class="card-grid">
+  {% for service in services %}
+  <article class="card">
+    <div class="card-title">
+      <a href="{{ url_for('main.service_detail', service_id=service.id) }}">
+        {{ service.title }}
+      </a>
+    </div>
+    <div class="card-category">
+      {{ service.category }} · by
+      {{ service.owner.profile.company_name if service.owner.profile else service.owner.email }}
+    </div>
+    <div class="card-price">
+      ${{ '%.2f'|format(service.price) }} &middot; {{ service.delivery_time }} days
+    </div>
+    {% if service.tags %}
+    <div class="card-tags">
+      {% for tag in service.tags.split(',') %}
+      <span class="tag">{{ tag.strip() }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<p class="section-subtitle">
+  No services found with the current filters.
+</p>
+{% endif %}
+{% endblock %}

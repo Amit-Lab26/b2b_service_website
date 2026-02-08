@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Home · B2B Service Marketplace{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1 class="hero-title">
+      Discover, sell, and collaborate with businesses worldwide.
+    </h1>
+    <p class="hero-subtitle">
+      A B2B marketplace where companies list services, find partners, and manage
+      orders and communication in one secure, modern platform.
+    </p>
+    <div class="hero-actions">
+      <a href="{{ url_for('main.service_list') }}" class="btn btn-primary">
+        Browse services
+      </a>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('main.create_service') }}" class="btn btn-outline">
+        List your service
+      </a>
+      {% else %}
+      <a href="{{ url_for('main.register') }}" class="btn btn-outline">
+        Create a business account
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hero-card">
+    <h2>Why teams use B2B Services</h2>
+    <ul>
+      <li>🌐 Discover vetted service providers across industries</li>
+      <li>🤝 Manage deals with integrated orders & messaging</li>
+      <li>🔐 Built-in authentication & security best practices</li>
+      <li>📈 Grow your pipeline without leaving your browser</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="section-header">
+    <div>
+      <div class="section-title">Latest services</div>
+      <div class="section-subtitle">Recently listed offers from other businesses</div>
+    </div>
+    <a href="{{ url_for('main.service_list') }}" class="btn btn-outline">
+      View all
+    </a>
+  </div>
+
+  {% if services %}
+  <div class="card-grid">
+    {% for service in services %}
+    <article class="card">
+      <div class="card-title">
+        <a href="{{ url_for('main.service_detail', service_id=service.id) }}">
+          {{ service.title }}
+        </a>
+      </div>
+      <div class="card-category">
+        {{ service.category }} · by {{ service.owner.profile.company_name if service.owner.profile else service.owner.email }}
+      </div>
+      <div class="card-price">
+        ${{ '%.2f'|format(service.price) }} &middot; {{ service.delivery_time }} days delivery
+      </div>
+      {% if service.tags %}
+      <div class="card-tags">
+        {% for tag in service.tags.split(',') %}
+        <span class="tag">{{ tag.strip() }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="section-subtitle">No services listed yet. Be the first to publish one!</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}B2B Service Marketplace{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    >
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="navbar-inner">
+        <div class="nav-brand">
+          <div class="nav-logo"></div>
+          <span>B2B Services</span>
+        </div>
+        <nav class="nav-links">
+          <a href="{{ url_for('main.index') }}"
+             class="{% if request.endpoint == 'main.index' %}active{% endif %}">
+            Home
+          </a>
+          <a href="{{ url_for('main.service_list') }}"
+             class="{% if request.endpoint == 'main.service_list' %}active{% endif %}">
+            Browse Services
+          </a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('main.dashboard') }}"
+             class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+            Dashboard
+          </a>
+          <a href="{{ url_for('main.orders') }}"
+             class="{% if request.endpoint == 'main.orders' %}active{% endif %}">
+            Orders
+          </a>
+          <a href="{{ url_for('main.messages_overview') }}"
+             class="{% if request.endpoint == 'main.messages_overview' %}active{% endif %}">
+            Messages
+          </a>
+          {% if current_user.is_admin %}
+          <a href="{{ url_for('main.admin_panel') }}"
+             class="{% if request.endpoint == 'main.admin_panel' %}active{% endif %}">
+            Admin
+          </a>
+          {% endif %}
+          {% endif %}
+        </nav>
+        <div class="nav-auth">
+          {% if current_user.is_authenticated %}
+          <span class="text-sm">Hi, {{ current_user.email }}</span>
+          <form action="{{ url_for('main.logout') }}" method="get" style="margin:0;">
+            <button type="submit" class="btn btn-outline">Logout</button>
+          </form>
+          {% else %}
+          <a href="{{ url_for('main.login') }}" class="btn btn-outline">Log In</a>
+          <a href="{{ url_for('main.register') }}" class="btn btn-primary">Sign Up</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div>&copy; {{ 2025 }} B2B Service Marketplace</div>
+        <div>Built with Flask &middot; Secure & CSRF-protected</div>
+      </div>
+    </footer>
+  </body>
+</html>

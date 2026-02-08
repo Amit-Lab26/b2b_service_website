@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Messages · B2B Service Marketplace{% endblock %}
+
+{% block content %}
+{% if overview_orders is defined %}
+  <h1 class="hero-title" style="font-size: 1.4rem; margin-bottom: 0.5rem;">
+    Messages
+  </h1>
+  <p class="hero-subtitle" style="margin-bottom: 1rem;">
+    Select an order to see the conversation between you and your counterpart.
+  </p>
+
+  <div class="dashboard-card">
+    {% if overview_orders %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Service</th>
+          <th>Counterparty</th>
+          <th>Status</th>
+          <th>Opened</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in overview_orders %}
+        <tr>
+          <td>
+            <a href="{{ url_for('main.order_detail', order_id=order.id) }}">
+              #{{ order.id }}
+            </a>
+          </td>
+          <td>{{ order.service.title }}</td>
+          <td>
+            {% if current_user.id == order.buyer_id %}
+            {{ order.seller.profile.company_name if order.seller.profile else order.seller.email }}
+            {% else %}
+            {{ order.buyer.profile.company_name if order.buyer.profile else order.buyer.email }}
+            {% endif %}
+          </td>
+          <td>{{ order.status|capitalize }}</td>
+          <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="section-subtitle">
+      You don't have any orders yet. Start by requesting or providing a service.
+    </p>
+    {% endif %}
+  </div>
+
+{% else %}
+  <h1 class="hero-title" style="font-size: 1.4rem; margin-bottom: 0.5rem;">
+    Order #{{ order.id }} messages
+  </h1>
+  <p class="hero-subtitle" style="margin-bottom: 1rem;">
+    {{ order.service.title }} &middot;
+    Buyer: {{ order.buyer.profile.company_name if order.buyer.profile else order.buyer.email }} &middot;
+    Seller: {{ order.seller.profile.company_name if order.seller.profile else order.seller.email }}
+  </p>
+
+  <div class="messages-container">
+    <div class="chat-box">
+      <div class="chat-messages">
+        {% for msg in messages %}
+        <div class="chat-message {% if msg.sender_id == current_user.id %}self{% endif %}">
+          <div>{{ msg.content }}</div>
+          <div class="chat-meta">
+            {{ msg.sender.profile.company_name if msg.sender.profile else msg.sender.email }}
+            · {{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}
+          </div>
+        </div>
+        {% endfor %}
+        {% if not messages %}
+        <p class="section-subtitle">No messages yet. Start the conversation below.</p>
+        {% endif %}
+      </div>
+
+      <form method="post">
+        {{ message_form.hidden_tag() }}
+        <div class="form-group">
+          {{ message_form.content.label }}
+          {{ message_form.content }}
+          {% for error in message_form.content.errors %}
+          <div class="flash flash-danger">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="form-actions">
+          {{ message_form.submit(class_="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+
+    <div class="dashboard-card">
+      <h2>Order details</h2>
+      <p style="font-size: 0.85rem;">
+        <strong>Status:</strong> {{ order.status|capitalize }}<br>
+        <strong>Created:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}<br>
+        <strong>Service:</strong> {{ order.service.title }}<br>
+        <strong>Price:</strong> ${{ '%.2f'|format(order.service.price) }}
+      </p>
+
+      {% if status_form %}
+      <hr style="border-color: var(--border); margin: 0.8rem 0;">
+      <h2>Update status</h2>
+      <form method="post">
+        {{ status_form.hidden_tag() }}
+        <div class="form-group">
+          {{ status_form.status.label }}
+          {{ status_form.status }}
+          {% for error in status_form.status.errors %}
+          <div class="flash flash-danger">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="form-actions">
+          {{ status_form.submit(class_="btn btn-outline") }}
+        </div>
+      </form>
+      {% endif %}
+
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+        Only the seller or an admin can update the status of this order.
+      </p>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

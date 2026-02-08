@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{% if edit_mode %}Edit Service{% else %}Create Service{% endif %} · B2B Service Marketplace{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 620px;">
+  <h1 class="hero-title" style="font-size: 1.3rem; margin-bottom: 0.5rem;">
+    {% if edit_mode %}Edit service{% else %}Create a new service{% endif %}
+  </h1>
+  <p class="hero-subtitle" style="margin-bottom: 1.25rem;">
+    Define the details of the service your business offers.
+  </p>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.title.label }}
+      {{ form.title }}
+      {% for error in form.title.errors %}
+      <div class="flash flash-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.category.label }}
+      {{ form.category }}
+      {% for error in form.category.errors %}
+      <div class="flash flash-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.description.label }}
+      {{ form.description }}
+      {% for error in form.description.errors %}
+      <div class="flash flash-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.price.label }}
+      {{ form.price }}
+      {% for error in form.price.errors %}
+      <div class="flash flash-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.delivery_time.label }}
+      {{ form.delivery_time }}
+      {% for error in form.delivery_time.errors %}
+      <div class="flash flash-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.tags.label }}
+      {{ form.tags }}
+      {% for error in form.tags.errors %}
+      <div class="flash flash-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      {{ form.submit(class_="btn btn-primary") }}
+    </div>
+  </form>
+</div>
+{% endblock %}

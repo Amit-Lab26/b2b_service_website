@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · B2B Service Marketplace{% endblock %}
+
+{% block content %}
+{% if admin_mode %}
+  <h1 class="hero-title" style="font-size: 1.4rem;">Admin Panel</h1>
+  <p class="hero-subtitle">Manage users and services.</p>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <h2>Users</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Company</th>
+            <th>Admin?</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.email }}</td>
+            <td>{{ user.profile.company_name if user.profile else "-" }}</td>
+            <td>{{ "Yes" if user.is_admin else "No" }}</td>
+            <td>
+              {% if not user.is_admin %}
+              <form action="{{ url_for('main.admin_delete_user', user_id=user.id) }}"
+                    method="post" style="display:inline;">
+                {{ csrf_token() }}
+                <button class="btn btn-danger" onclick="return confirm('Delete user?');">
+                  Delete
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="dashboard-card">
+      <h2>Services</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Owner</th>
+            <th>Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for service in services %}
+          <tr>
+            <td>{{ service.title }}</td>
+            <td>{{ service.owner.profile.company_name if service.owner.profile else service.owner.email }}</td>
+            <td>${{ '%.2f'|format(service.price) }}</td>
+            <td>
+              <form action="{{ url_for('main.admin_delete_service', service_id=service.id) }}"
+                    method="post" style="display:inline;">
+                {{ csrf_token() }}
+                <button class="btn btn-danger" onclick="return confirm('Delete service?');">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% else %}
+  <h1 class="hero-title" style="font-size: 1.4rem;">Dashboard</h1>
+  <p class="hero-subtitle">Manage your business profile, services, and orders.</p>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <h2>Your business profile</h2>
+      {% if profile %}
+      <p><strong>{{ profile.company_name }}</strong></p>
+      <p style="color: var(--text-muted); font-size: 0.8rem;">
+        {{ profile.description or "No description yet." }}
+      </p>
+      <p style="font-size: 0.8rem;">
+        Location: {{ profile.location or "n/a" }}<br>
+        Website: {% if profile.website %}<a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a>{% else %}n/a{% endif %}<br>
+        Phone: {{ profile.phone or "n/a" }}<br>
+        Contact email: {{ profile.contact_email or "n/a" }}
+      </p>
+      <a href="{{ url_for('main.profile') }}" class="btn btn-outline">Edit profile</a>
+      {% else %}
+      <p>No profile found.</p>
+      <a href="{{ url_for('main.profile') }}" class="btn btn-outline">Create profile</a>
+      {% endif %}
+    </div>
+
+    <div class="dashboard-card">
+      <h2>Your services</h2>
+      <p class="section-subtitle">
+        Created services: {{ my_services|length }}
+      </p>
+      <a href="{{ url_for('main.create_service') }}" class="btn btn-primary" style="margin-bottom: 0.75rem;">
+        Create new service
+      </a>
+      {% if my_services %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for service in my_services %}
+          <tr>
+            <td>
+              <a href="{{ url_for('main.service_detail', service_id=service.id) }}">
+                {{ service.title }}
+              </a>
+            </td>
+            <td>{{ service.category }}</td>
+            <td>${{ '%.2f'|format(service.price) }}</td>
+            <td>
+              <a href="{{ url_for('main.edit_service', service_id=service.id) }}" class="btn btn-outline">
+                Edit
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="font-size: 0.8rem; color: var(--text-muted);">
+        You haven't created any services yet.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="dashboard-grid" style="margin-top: 1.5rem;">
+    <div class="dashboard-card">
+      <h2>Orders as buyer</h2>
+      {% if orders_buyer %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Seller</th>
+            <th>Status</th>
+            <th>Opened</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders_buyer %}
+          <tr>
+            <td>
+              <a href="{{ url_for('main.order_detail', order_id=order.id) }}">
+                {{ order.service.title }}
+              </a>
+            </td>
+            <td>{{ order.seller.profile.company_name if order.seller.profile else order.seller.email }}</td>
+            <td>{{ order.status|capitalize }}</td>
+            <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="section-subtitle">No orders placed yet.</p>
+      {% endif %}
+    </div>
+    <div class="dashboard-card">
+      <h2>Orders as seller</h2>
+      {% if orders_seller %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Buyer</th>
+            <th>Status</th>
+            <th>Opened</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders_seller %}
+          <tr>
+            <td>
+              <a href="{{ url_for('main.order_detail', order_id=order.id) }}">
+                {{ order.service.title }}
+              </a>
+            </td>
+            <td>{{ order.buyer.profile.company_name if order.buyer.profile else order.buyer.email }}</td>
+            <td>{{ order.status|capitalize }}</td>
+            <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="section-subtitle">No incoming orders yet.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

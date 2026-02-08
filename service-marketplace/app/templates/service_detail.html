@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ service.title }} · B2B Service Marketplace{% endblock %}
+
+{% block content %}
+<article class="dashboard-card" style="max-width: 800px; margin: 0 auto;">
+  <h1 class="hero-title" style="font-size: 1.4rem; margin-bottom: 0.5rem;">
+    {{ service.title }}
+  </h1>
+  <p class="card-category" style="margin-bottom: 0.75rem;">
+    {{ service.category }} · by
+    {{ service.owner.profile.company_name if service.owner.profile else service.owner.email }}
+  </p>
+  <p style="font-size: 0.9rem; margin-bottom: 1rem;">
+    {{ service.description }}
+  </p>
+  <p style="font-size: 0.9rem; margin-bottom: 0.75rem;">
+    <strong>Price:</strong> ${{ '%.2f'|format(service.price) }}<br>
+    <strong>Delivery time:</strong> {{ service.delivery_time }} days
+  </p>
+  {% if service.tags %}
+  <p class="card-tags" style="margin-bottom: 1rem;">
+    {% for tag in service.tags.split(',') %}
+    <span class="tag">{{ tag.strip() }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+    {% if can_request %}
+    <form method="post">
+      {{ csrf_token() }}
+      <button type="submit" class="btn btn-primary">
+        Request this service
+      </button>
+    </form>
+    {% elif current_user.is_authenticated and current_user.id == service.owner_id %}
+    <a href="{{ url_for('main.edit_service', service_id=service.id) }}" class="btn btn-outline">
+      Edit service
+    </a>
+    {% else %}
+    <p style="font-size: 0.8rem; color: var(--text-muted);">
+      Log in to request this service.
+    </p>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}
